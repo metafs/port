@@ -1,4 +1,3 @@
-// src/app/works/page.tsx
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -7,21 +6,19 @@ import {
   AspectRatio,
   Text,
   Box,
-  Overlay,
+  Badge,
+  Stack,
 } from "@mantine/core";
 import { getWorks } from "@/lib/microcms";
 
-// 30秒ごとのISR
 export const revalidate = 30;
 
 export default async function WorksPage() {
   const works = await getWorks();
 
-  console.log("Works Data:", JSON.stringify(works, null, 2));
-
   if (works.length === 0) {
     return (
-      <Container size="lg" py={100}>
+      <Container size="lg" py={120}>
         <Text c="dimmed" ta="center">
           No works found.
         </Text>
@@ -30,21 +27,25 @@ export default async function WorksPage() {
   }
 
   return (
-    <Container size="xl" py={100}>
-      <Text fz={40} mb={60} fw={300} style={{ letterSpacing: "0.1em" }}>
-        Works
-      </Text>
+    <Container size="xl" py={{ base: 96, md: 120 }}>
+      <Stack gap={10} mb={50}>
+        <Text fz={{ base: 30, md: 44 }} fw={300} style={{ letterSpacing: "0.08em" }}>
+          Works
+        </Text>
+        <Text c="dimmed" maw={760} lh={1.75}>
+          選定や依頼の判断をしやすいよう、作品タイトルと制作年を一覧化。
+          各作品ページでコンセプト・クレジット・リンクへすぐアクセスできます。
+        </Text>
+      </Stack>
 
-      <SimpleGrid
-        cols={{ base: 1, sm: 2, md: 3 }}
-        spacing="xl"
-        verticalSpacing={60}
-      >
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl" verticalSpacing={42}>
         {works.map((work) => {
-          const thumbnail =
-            work.image && work.image[0] ? `${work.image[0].url}?w=800` : null;
+          const thumbnail = work.image?.[0] ? `${work.image[0].url}?w=900` : null;
+          const displayYear = work.date
+            ? new Date(work.date).getFullYear()
+            : new Date(work.publishedAt).getFullYear();
+
           return (
-            // 【修正箇所】Box component={Link} をやめて、Linkタグで直接囲む
             <Link
               key={work.id}
               href={`/works/${work.id}`}
@@ -54,32 +55,22 @@ export default async function WorksPage() {
                 display: "block",
               }}
             >
-              <Box>
-                {/* 画像エリア */}
-                <AspectRatio
-                  ratio={16 / 9}
-                  style={{
-                    overflow: "hidden",
-                    borderRadius: "4px",
-                    backgroundColor: "#2C2E33",
-                  }}
-                >
-                  <Box
-                    style={{
-                      position: "relative",
-                      width: "100%",
-                      height: "100%",
-                    }}
-                  >
+              <Box
+                style={{
+                  borderRadius: 8,
+                  overflow: "hidden",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(255,255,255,0.02)",
+                }}
+              >
+                <AspectRatio ratio={16 / 10}>
+                  <Box style={{ position: "relative", width: "100%", height: "100%" }}>
                     {thumbnail ? (
                       <Image
                         src={thumbnail}
                         alt={work.title}
                         fill
-                        style={{
-                          objectFit: "cover",
-                          transition: "transform 0.5s",
-                        }}
+                        style={{ objectFit: "cover" }}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     ) : (
@@ -90,22 +81,21 @@ export default async function WorksPage() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          color: "#555",
+                          color: "#777",
+                          backgroundColor: "#2C2E33",
                         }}
                       >
                         <Text fz="xs">No Image</Text>
                       </Box>
                     )}
-                    <Overlay opacity={0} color="#000" zIndex={1} />
                   </Box>
                 </AspectRatio>
 
-                {/* テキスト情報 */}
-                <Box mt="md">
-                  <Text fz="sm" c="dimmed" mb={4}>
-                    {new Date(work.publishedAt).getFullYear()}
-                  </Text>
-                  <Text fz="xl" fw={400} style={{ letterSpacing: "0.05em" }}>
+                <Box p="md">
+                  <Badge variant="dot" color="gray" mb={8}>
+                    {displayYear}
+                  </Badge>
+                  <Text fz={{ base: "lg", md: "xl" }} fw={400} style={{ letterSpacing: "0.03em" }}>
                     {work.title}
                   </Text>
                 </Box>
