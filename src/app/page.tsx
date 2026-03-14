@@ -1,32 +1,32 @@
 "use client";
 
-import { Box, Center, Text, Overlay, Stack, Button, Group, Badge } from "@mantine/core";
+import { Box, Center, Text, Overlay, Stack } from "@mantine/core";
 import { motion } from "framer-motion";
-import Link from "next/link";
-
-const MARKET_POINTS = [
-  "Commission & Collaboration Open",
-  "International Festival Friendly",
-  "Contemporary Dance / Performance Art",
-];
+import { IconChevronDown } from "@tabler/icons-react";
 
 export default function Home() {
   return (
     <Box
       style={{
-        minHeight: "100dvh",
+        width: "100vw",
+        height: "100vh",
         position: "relative",
         overflow: "hidden",
         backgroundColor: "#000",
       }}
     >
+      {/* 1. 背景動画エリア */}
       <Box
         style={{
           position: "absolute",
-          inset: 0,
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
           zIndex: 0,
         }}
       >
+        {/* 動画がある場合はここを有効化してください */}
         <video
           autoPlay
           loop
@@ -37,105 +37,84 @@ export default function Home() {
           <source src="/assets/hero.MP4" type="video/mp4" />
         </video>
 
+        {/* 動画がない場合のダミー背景（雰囲気のあるグラデーション） */}
         <Box
           style={{
             width: "100%",
             height: "100%",
             background:
-              "radial-gradient(circle at 50% 50%, rgba(53,57,66,0.55) 0%, rgba(0,0,0,0.8) 75%)",
-            position: "absolute",
-            inset: 0,
+              "radial-gradient(circle at 50% 50%, #2C2E33 0%, #000000 80%)",
+            opacity: 0.8,
           }}
         />
       </Box>
 
-      <Overlay color="#000" opacity={0.45} zIndex={1} />
+      {/* 2. 背景を少し暗くするフィルター (文字を読みやすくするため) */}
+      <Overlay color="#000" opacity={0.4} zIndex={1} />
 
+      {/* 3. メインコンテンツ (名前と肩書き) */}
       <Center
         style={{
           position: "relative",
           width: "100%",
-          minHeight: "100dvh",
+          height: "100%",
           zIndex: 2,
-          padding: "clamp(5rem, 14vh, 8rem) 1.25rem 2rem",
+          flexDirection: "column",
         }}
       >
         <motion.div
-          initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
+          initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 1.4, ease: "easeOut", delay: 0.2 }}
-          style={{ width: "min(760px, 100%)" }}
+          transition={{ duration: 2.0, ease: "easeOut", delay: 0.5 }}
         >
-          <Stack align="center" gap="lg">
+          <Stack align="center" gap="xs">
             <Text
               component="h1"
-              fz={{ base: 30, sm: 44, md: 58 }}
+              fz={{ base: 21, sm: 30, md: 40 }} // レスポンシブなフォントサイズ
               fw={300}
               c="white"
               style={{
-                letterSpacing: "0.12em",
-                lineHeight: 1.05,
+                letterSpacing: "0.15em",
+                lineHeight: 1.1,
                 textAlign: "center",
+                fontFeatureSettings: '"palt"', // 日本語フォントの文字詰め
               }}
             >
-              SHOYA FUKUNAGA
+              Shoya Fukunaga
             </Text>
 
             <Text
-              fz={{ base: 13, md: 15 }}
-              c="gray.3"
+              fz={{ base: 14, md: 16 }}
+              c="dimmed"
               style={{
-                letterSpacing: "0.22em",
+                letterSpacing: "0.3em",
                 textTransform: "uppercase",
-                textAlign: "center",
+                opacity: 0.8,
               }}
             >
               Choreographer / Dance Artist
             </Text>
-
-            <Text
-              maw={640}
-              ta="center"
-              c="gray.4"
-              lh={1.85}
-              fz={{ base: 14, sm: 16 }}
-            >
-              身体表現の詩性と空間演出を軸に、舞台・映像・インスタレーションを横断。
-              キュレーター、フェスティバル、コレクターに向けて、作品の文脈と再演可能性が伝わるポートフォリオ設計を行っています。
-            </Text>
-
-            <Group gap="xs" justify="center">
-              {MARKET_POINTS.map((point) => (
-                <Badge
-                  key={point}
-                  variant="light"
-                  color="gray"
-                  radius="sm"
-                  styles={{
-                    root: {
-                      textTransform: "none",
-                      letterSpacing: "0.03em",
-                      backdropFilter: "blur(6px)",
-                      border: "1px solid rgba(255,255,255,0.18)",
-                    },
-                  }}
-                >
-                  {point}
-                </Badge>
-              ))}
-            </Group>
-
-            <Group mt="sm" gap="md">
-              <Button component={Link} href="/works" variant="white" color="dark">
-                View Works
-              </Button>
-              <Button component={Link} href="/contact" variant="outline" color="gray">
-                Contact / Booking
-              </Button>
-            </Group>
           </Stack>
         </motion.div>
       </Center>
+
+      {/* 4. スクロールダウンの指示 (装飾) */}
+      <Box
+        style={{
+          position: "absolute",
+          bottom: 40,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 2,
+        }}
+      >
+        <motion.div
+          animate={{ y: [0, 10, 0], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <IconChevronDown color="white" size={32} style={{ opacity: 0.6 }} />
+        </motion.div>
+      </Box>
     </Box>
   );
 }

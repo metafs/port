@@ -1,16 +1,7 @@
 "use client";
 
-import {
-  Burger,
-  Drawer,
-  Stack,
-  Text,
-  Box,
-  Center,
-  Group,
-  Anchor,
-} from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { Burger, Drawer, Stack, Text, Box, Center } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -24,10 +15,10 @@ const NAV_ITEMS = [
 export function Header() {
   const [opened, { toggle, close }] = useDisclosure(false);
   const pathname = usePathname();
-  const isDesktop = useMediaQuery("(min-width: 62em)");
 
   return (
     <>
+      {/* 常に最前面に固定表示されるヘッダーエリア */}
       <Box
         component="header"
         style={{
@@ -35,83 +26,62 @@ export function Header() {
           top: 0,
           left: 0,
           right: 0,
-          padding: "1rem clamp(1rem, 2.8vw, 2.5rem)",
+          padding: "2rem", // 余白
           zIndex: 1000,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          background: "rgba(16, 17, 19, 0.6)",
-          backdropFilter: "blur(10px)",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          background: "transparent",
+          pointerEvents: "none", // 重要: これによりヘッダーの隙間は背面のクリックを透過する
         }}
       >
+        {/* 左上: アーティスト名 */}
         <Text
           component={Link}
           href="/"
-          size="sm"
-          fw={500}
+          size="lg"
+          fw={400}
           style={{
+            pointerEvents: "auto", // ロゴはクリックできるように戻す
             textDecoration: "none",
-            color: "white",
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
+            color: "inherit",
+            letterSpacing: "0.1em",
           }}
         >
           Shoya Fukunaga
         </Text>
 
-        {isDesktop ? (
-          <Group gap={28}>
-            {NAV_ITEMS.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Anchor
-                  key={item.href}
-                  component={Link}
-                  href={item.href}
-                  underline="never"
-                  c={isActive ? "white" : "gray.5"}
-                  fw={isActive ? 500 : 400}
-                  style={{
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    fontSize: "0.82rem",
-                  }}
-                >
-                  {item.label}
-                </Anchor>
-              );
-            })}
-          </Group>
-        ) : (
+        {/* 右上: ハンバーガーボタン */}
+        <Box style={{ pointerEvents: "auto" }}>
           <Burger
             opened={opened}
             onClick={toggle}
             aria-label="Toggle navigation"
-            size="sm"
+            size="md"
             color="white"
           />
-        )}
+        </Box>
       </Box>
 
+      {/* 全画面メニュー (Drawer) */}
       <Drawer
         opened={opened}
         onClose={close}
-        size="100%"
-        withCloseButton={false}
-        transitionProps={{ duration: 350, transition: "fade" }}
+        size="100%" // 全画面表示
+        withCloseButton={false} // デフォルトの閉じるボタンは消す（Burgerで制御）
+        transitionProps={{ duration: 400, transition: "fade" }} // ふわっと表示
         styles={{
           body: {
             height: "100%",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            backgroundColor: "#101113",
+            backgroundColor: "#1A1B1E", // メニュー背景色（ダークグレー）
           },
         }}
       >
         <Center>
-          <Stack gap={34} align="center">
+          <Stack gap={40} align="center">
             {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -120,13 +90,18 @@ export function Header() {
                   component={Link}
                   href={item.href}
                   onClick={close}
-                  fz={32}
+                  fz={32} // 大きめのフォントサイズ
                   fw={300}
                   style={{
                     textDecoration: "none",
-                    color: isActive ? "white" : "#888",
-                    letterSpacing: "0.08em",
+                    color: isActive ? "white" : "#888", // アクティブ以外は暗く
+                    transition: "color 0.3s",
+                    cursor: "pointer",
                   }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "white")}
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = isActive ? "white" : "#888")
+                  }
                 >
                   {item.label}
                 </Text>

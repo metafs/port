@@ -14,6 +14,7 @@ import {
 } from "@mantine/core";
 import {
   IconBrandInstagram,
+  IconBrandTwitter,
   IconMail,
   IconCopy,
   IconCheck,

@@ -3,60 +3,45 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// 粒子の型定義
 type Particle = {
   id: number;
   x: number;
   y: number;
   size: number;
-  driftX: number;
-  driftY: number;
 };
 
 export const ParticleCursor = () => {
   const [particles, setParticles] = useState<Particle[]>([]);
-  const [enabled, setEnabled] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const countRef = useRef(0);
-  const mouseRef = useRef({ x: 0, y: 0 });
+  const countRef = useRef(0); // ユニークID生成用
+  const mouseRef = useRef({ x: 0, y: 0 }); // 最新のマウス位置
 
   useEffect(() => {
-    const media = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const updateEnabled = () => setEnabled(media.matches);
-    updateEnabled();
-
-    media.addEventListener("change", updateEnabled);
-    return () => media.removeEventListener("change", updateEnabled);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
+    // マウス移動時に現在地を更新
     const handleMouseMove = (e: MouseEvent) => {
-      const nextPos = { x: e.clientX, y: e.clientY };
-      mouseRef.current = nextPos;
-      setMousePosition(nextPos);
+      mouseRef.current = { x: e.clientX, y: e.clientY };
     };
 
+    // 一定間隔で粒子を生成するループ (10msごと)
     const interval = setInterval(() => {
       const { x, y } = mouseRef.current;
 
       setParticles((prev) => {
-        const newParticles = prev.length > 24 ? prev.slice(1) : prev;
+        // 古い粒子（20個以上）は削除してパフォーマンス維持
+        const newParticles = prev.length > 30 ? prev.slice(1) : prev;
+
+        // 新しい粒子を追加
         return [
           ...newParticles,
           {
             id: countRef.current++,
-            x,
-            y,
-            size: Math.random() * 3 + 2,
-            driftX: (Math.random() - 0.5) * 12,
-            driftY: (Math.random() - 0.5) * 12,
+            x: x,
+            y: y,
+            size: Math.random() * 4 + 2, // 2px〜6pxのランダムなサイズ
           },
         ];
       });
-    }, 28);
+    }, 20); // 生成頻度: 数値を小さくすると粒子が増えて密度が濃くなる
 
     window.addEventListener("mousemove", handleMouseMove);
 
@@ -64,11 +49,7 @@ export const ParticleCursor = () => {
       window.removeEventListener("mousemove", handleMouseMove);
       clearInterval(interval);
     };
-  }, [enabled]);
-
-  if (!enabled) {
-    return null;
-  }
+  }, []);
 
   return (
     <div
@@ -78,7 +59,7 @@ export const ParticleCursor = () => {
         left: 0,
         width: "100vw",
         height: "100vh",
-        pointerEvents: "none",
+        pointerEvents: "none", // クリックを阻害しない
         zIndex: 9999,
         overflow: "hidden",
       }}
@@ -87,30 +68,31 @@ export const ParticleCursor = () => {
         {particles.map((particle) => (
           <motion.div
             key={particle.id}
-            initial={{ opacity: 0.75, scale: 1, x: particle.x, y: particle.y }}
+            initial={{ opacity: 0.8, scale: 1, x: particle.x, y: particle.y }}
             animate={{
               opacity: 0,
-              scale: 0.25,
-              x: particle.x + particle.driftX,
-              y: particle.y + particle.driftY,
+              scale: 0.3, // 徐々に小さくなる
+              x: particle.x + (Math.random() - 0.5) * 10, // ほんの少し左右に揺らぐ
+              y: particle.y + (Math.random() - 0.5) * 10, // ほんの少し上下に揺らぐ
             }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.75, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: "easeOut" }} // 0.6秒かけて消える
             style={{
               position: "absolute",
               width: particle.size,
               height: particle.size,
-              backgroundColor: "white",
+              backgroundColor: "white", // 粒子の色
               borderRadius: "50%",
-              boxShadow: "0 0 4px rgba(255, 255, 255, 0.45)",
+              boxShadow: "0 0 4px rgba(255, 255, 255, 0.5)", // ほのかな発光
               top: 0,
               left: 0,
-              transform: "translate(-50%, -50%)",
+              transform: "translate(-50%, -50%)", // 中心合わせ（motionのx,yで制御するためここは固定でも可だが初期位置として）
             }}
           />
         ))}
       </AnimatePresence>
 
+      {/* 以下のdivは現在のカーソル位置にある「本体のドット」です */}
       <motion.div
         style={{
           position: "fixed",
@@ -121,10 +103,8 @@ export const ParticleCursor = () => {
           backgroundColor: "white",
           borderRadius: "50%",
           pointerEvents: "none",
-          mixBlendMode: "difference",
+          mixBlendMode: "difference", // 背景と色が反転して見やすくなる
         }}
-        animate={{ x: mousePosition.x - 4, y: mousePosition.y - 4 }}
-        transition={{ type: "spring", stiffness: 260, damping: 22, mass: 0.2 }}
       />
     </div>
   );
